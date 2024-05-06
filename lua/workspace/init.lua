@@ -46,7 +46,6 @@ local default_options = {
   end
 }
 
-
 local function open_workspace_popup(workspace, options)
   if not tmux.is_running() then
     vim.api.nvim_err_writeln("Tmux is not running or not in a tmux session")
@@ -54,10 +53,22 @@ local function open_workspace_popup(workspace, options)
   end
 
   local workspace_path = vim.fn.expand(workspace.path) -- Expand the ~ symbol
-  -- Fetch all .git directories recursively
-  local git_folders = vim.fn.globpath(workspace_path, '*/.git', 1, 1)
+  -- Recursive function to find git repositories
+  local function find_git_repos(path, repos)
+    local files = vim.fn.globpath(path, '*', 0, 1)
+    for _, file in ipairs(files) do
+      if vim.fn.isdirectory(file) == 1 then
+        if vim.fn.isdirectory(file .. '/.git') == 1 then
+          table.insert(repos, file)
+        end
+        find_git_repos(file, repos)  -- Recurse into subdirectories
+      end
+    end
+  end
 
   local entries = {}
+  local git_repositories = {}
+  find_git_repos(workspace_path, git_repositories)
 
   table.insert(entries, {
     value = "newProject",
@@ -65,12 +76,11 @@ local function open_workspace_popup(workspace, options)
     ordinal = "Create new project",
   })
 
-  for _, git_folder in ipairs(git_folders) do
-    local repo_path = vim.fn.fnamemodify(git_folder, ":h") -- Get the parent directory of .git
+  for _, repo in ipairs(git_repositories) do
     table.insert(entries, {
-      value = repo_path,
-      display = workspace.path .. "/" .. repo_path:match("./([^/]+)$"),
-      ordinal = repo_path,
+      value = repo,
+      display = repo:sub(#workspace_path + 2), -- Display relative path
+      ordinal = repo,
     })
   end
 
