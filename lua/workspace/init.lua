@@ -41,7 +41,7 @@ local default_options = {
     --{ name = "Projects", path = "~/Projects", keymap = { "<leader>o" } },
   },
   tmux_session_name_generator = function(project_name, workspace_name)
-    local session_name = string.upper(project_name)
+    local session_name = string.lower(project_name)
     return session_name
   end
 }

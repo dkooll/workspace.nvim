@@ -15,7 +15,7 @@ function M.manage_session(project_path, workspace, options)
   local session_name = options.tmux_session_name_generator(project_name, workspace.name)
 
   if session_name == nil then
-    session_name = string.upper(project_name)
+    session_name = string.lower(project_name)
   end
   session_name = session_name:gsub("[^%w_]", "_")
 
