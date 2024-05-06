@@ -48,14 +48,14 @@ local default_options = {
 
 
 local function open_workspace_popup(workspace, options)
-
   if not tmux.is_running() then
     vim.api.nvim_err_writeln("Tmux is not running or not in a tmux session")
     return
   end
 
   local workspace_path = vim.fn.expand(workspace.path) -- Expand the ~ symbol
-  local folders = vim.fn.globpath(workspace_path, '*', 1, 1)
+  -- Fetch all .git directories recursively
+  local git_folders = vim.fn.globpath(workspace_path, '*/.git', 1, 1)
 
   local entries = {}
 
@@ -65,11 +65,12 @@ local function open_workspace_popup(workspace, options)
     ordinal = "Create new project",
   })
 
-  for _, folder in ipairs(folders) do
+  for _, git_folder in ipairs(git_folders) do
+    local repo_path = vim.fn.fnamemodify(git_folder, ":h") -- Get the parent directory of .git
     table.insert(entries, {
-      value = folder,
-      display = workspace.path .. "/" .. folder:match("./([^/]+)$"),
-      ordinal = folder,
+      value = repo_path,
+      display = workspace.path .. "/" .. repo_path:match("./([^/]+)$"),
+      ordinal = repo_path,
     })
   end
 
