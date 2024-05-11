@@ -53,9 +53,8 @@ local function open_workspace_popup(workspace, options)
   end
 
   local workspace_path = vim.fn.expand(workspace.path) -- Expand the ~ symbol
-  local max_depth = 3  -- Limit the search to 3 levels deep
-  --local find_command = "find " .. workspace_path .. " -type d -name .git -prune -maxdepth " .. tostring(max_depth)
-  local find_command = "find " .. workspace_path .. " -type d -name .git -prune -maxdepth " .. tostring(max_depth) .. " -not -path '*/archive/*'" --skip archive folder
+  local max_depth = 3
+  local find_command = "find " .. workspace_path .. " -type d -name .git -prune -maxdepth " .. tostring(max_depth) .. " -not -path '*/archive/*'"
 
   local git_dirs = vim.fn.systemlist(find_command)
 
@@ -101,70 +100,6 @@ local function open_workspace_popup(workspace, options)
     end,
   }):find()
 end
-
---local function open_workspace_popup(workspace, options)
-  --if not tmux.is_running() then
-    --vim.api.nvim_err_writeln("Tmux is not running or not in a tmux session")
-    --return
-  --end
-
-  --local workspace_path = vim.fn.expand(workspace.path) -- Expand the ~ symbol
-  ---- Recursive function to find git repositories
-  --local function find_git_repos(path, repos)
-    --local files = vim.fn.globpath(path, '*', 0, 1)
-    --for _, file in ipairs(files) do
-      --if vim.fn.isdirectory(file) == 1 then
-        --if vim.fn.isdirectory(file .. '/.git') == 1 then
-          --table.insert(repos, file)
-        --end
-        --find_git_repos(file, repos)  -- Recurse into subdirectories
-      --end
-    --end
-  --end
-
-  --local entries = {}
-  --local git_repositories = {}
-  --find_git_repos(workspace_path, git_repositories)
-
-  --table.insert(entries, {
-    --value = "newProject",
-    --display = "Create new project",
-    --ordinal = "Create new project",
-  --})
-
-  --for _, repo in ipairs(git_repositories) do
-    --table.insert(entries, {
-      --value = repo,
-      --display = repo:sub(#workspace_path + 2), -- Display relative path
-      --ordinal = repo,
-    --})
-  --end
-
-  --pickers.new({
-    --results_title = workspace.name,
-    --prompt_title = "Search in " .. workspace.name .. " workspace",
-  --}, {
-    --finder = finders.new_table {
-      --results = entries,
-      --entry_maker = function(entry)
-        --return {
-          --value = entry.value,
-          --display = entry.display,
-          --ordinal = entry.ordinal,
-        --}
-      --end,
-    --},
-    --sorter = sorters.get_fuzzy_file(),
-    --attach_mappings = function()
-      --action_set.select:replace(function(prompt_bufnr)
-        --local selection = action_state.get_selected_entry(prompt_bufnr)
-        --actions.close(prompt_bufnr)
-        --tmux.manage_session(selection.value, workspace, options)
-      --end)
-      --return true
-    --end,
-  --}):find()
---end
 
 ---@divider
 ---@mod workspace.tmux_sessions Tmux Sessions Selector
