@@ -54,7 +54,9 @@ local function open_workspace_popup(workspace, options)
 
   local workspace_path = vim.fn.expand(workspace.path) -- Expand the ~ symbol
   local max_depth = 3  -- Limit the search to 3 levels deep
-  local find_command = "find " .. workspace_path .. " -type d -name .git -prune -maxdepth " .. tostring(max_depth)
+  --local find_command = "find " .. workspace_path .. " -type d -name .git -prune -maxdepth " .. tostring(max_depth)
+  local find_command = "find " .. workspace_path .. " -type d -name .git -prune -maxdepth " .. tostring(max_depth) .. " -not -path '*/archive/*'" --skip archive folder
+
   local git_dirs = vim.fn.systemlist(find_command)
 
   local entries = {
