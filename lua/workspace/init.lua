@@ -36,6 +36,16 @@ local function validate_options(options)
   return true
 end
 
+local default_options = {
+  workspaces = {
+    --{ name = "Projects", path = "~/Projects", keymap = { "<leader>o" } },
+  },
+  tmux_session_name_generator = function(project_name, workspace_name)
+    local session_name = string.lower(project_name)
+    return session_name
+  end
+}
+
 local function open_workspace_popup(workspace, options)
   if not tmux.is_running() then
     vim.api.nvim_err_writeln("Tmux is not running or not in a tmux session")
@@ -51,21 +61,16 @@ local function open_workspace_popup(workspace, options)
   local entries = {
     {
       value = "newProject",
-      display = "Create new project | \27[38;5;8mRoot\27[m",
+      display = "Create new project",
       ordinal = "Create new project",
     }
   }
 
-  local base_path_length = #workspace_path
-
   for _, git_dir in ipairs(git_dirs) do
     local repo_path = vim.fn.fnamemodify(git_dir, ":h")
-    local relative_path = repo_path:sub(base_path_length + 2) -- Remove base path and leading slash
-    local folder_name = repo_path:match("([^/]+)$") -- Extract the last part of the path as folder name
-
     table.insert(entries, {
       value = repo_path,
-      display = folder_name .. " | \27[38;5;8m" .. relative_path .. "\27[m",
+      display = repo_path:sub(#workspace_path + 2),
       ordinal = repo_path,
     })
   end
@@ -95,72 +100,6 @@ local function open_workspace_popup(workspace, options)
     end,
   }):find()
 end
-
-
---local default_options = {
-  --workspaces = {
-    ----{ name = "Projects", path = "~/Projects", keymap = { "<leader>o" } },
-  --},
-  --tmux_session_name_generator = function(project_name, workspace_name)
-    --local session_name = string.lower(project_name)
-    --return session_name
-  --end
---}
-
---local function open_workspace_popup(workspace, options)
-  --if not tmux.is_running() then
-    --vim.api.nvim_err_writeln("Tmux is not running or not in a tmux session")
-    --return
-  --end
-
-  --local workspace_path = vim.fn.expand(workspace.path) -- Expand the ~ symbol
-  --local max_depth = 3
-  --local find_command = "find " .. workspace_path .. " -type d -name .git -prune -maxdepth " .. tostring(max_depth) .. " -not -path '*/archive/*'"
-
-  --local git_dirs = vim.fn.systemlist(find_command)
-
-  --local entries = {
-    --{
-      --value = "newProject",
-      --display = "Create new project",
-      --ordinal = "Create new project",
-    --}
-  --}
-
-  --for _, git_dir in ipairs(git_dirs) do
-    --local repo_path = vim.fn.fnamemodify(git_dir, ":h")
-    --table.insert(entries, {
-      --value = repo_path,
-      --display = repo_path:sub(#workspace_path + 2),
-      --ordinal = repo_path,
-    --})
-  --end
-
-  --pickers.new({
-    --results_title = workspace.name,
-    --prompt_title = "Search in " .. workspace.name .. " workspace",
-  --}, {
-    --finder = finders.new_table {
-      --results = entries,
-      --entry_maker = function(entry)
-        --return {
-          --value = entry.value,
-          --display = entry.display,
-          --ordinal = entry.ordinal,
-        --}
-      --end,
-    --},
-    --sorter = sorters.get_fuzzy_file(),
-    --attach_mappings = function()
-      --action_set.select:replace(function(prompt_bufnr)
-        --local selection = action_state.get_selected_entry(prompt_bufnr)
-        --actions.close(prompt_bufnr)
-        --tmux.manage_session(selection.value, workspace, options)
-      --end)
-      --return true
-    --end,
-  --}):find()
---end
 
 ---@divider
 ---@mod workspace.tmux_sessions Tmux Sessions Selector
