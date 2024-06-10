@@ -96,6 +96,7 @@ local function open_workspace_popup(workspace, options)
   }):find()
 end
 
+
 --local default_options = {
   --workspaces = {
     ----{ name = "Projects", path = "~/Projects", keymap = { "<leader>o" } },
